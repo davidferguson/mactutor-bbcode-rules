@@ -1,0 +1,27 @@
+{
+  "name": "@mactutor/bbcode-rules",
+  "version": "0.1.0",
+  "description": "Set of rules for serializing, deserializing and rendering the bbcodes used for MacTutor.",
+  "main": "lib/index.js",
+  "scripts": {
+    "prepare": "npm run-script build",
+    "build": "babel src -d lib",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "David Ferguson",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/davidferguson/mactutor-bbcode-rules"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.5",
+    "@babel/preset-env": "^7.4.5",
+    "@babel/preset-react": "^7.0.0"
+  },
+  "dependencies": {
+    "katex": "^0.10.2",
+    "react": "^16.8.6"
+  }
+}
