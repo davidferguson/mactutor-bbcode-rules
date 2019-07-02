@@ -1,6 +1,19 @@
 import React from 'react'
 import katex from 'katex'
 
+function purge_mlink (s) {
+  // The below code is modified from the original htmlformat function
+  // to ensure compatibility
+  const rawch   = ['á','à','â','ä','ã','Á','Â','Ä','é','è','ê','ë','É','î','í','ó','ô','ö','ò','õ','Ö','û','ú','ü','ù','Ü','ç','ï','ø','Ø','ñ']
+  const transch = ['a','a','a','a','a','A','A','A','e','e','e','e','E','i','i','o','o','o','o','o','O','u','u','u','u','U','c','i','o','O','n']
+  for (let i = 0; i < rawch.length; i++) {
+    const raw = rawch[i]
+    const trans = transch[i]
+    s = s.replace(raw, trans)
+  }
+  return s
+}
+
 const HTML_RULES = [
   {
     // blocks
@@ -37,6 +50,8 @@ const HTML_RULES = [
           return <p className="center-paragraph">{children}</p>
         case 'indent-paragraph':
           return <p className="indent-paragraph">{children}</p>
+        case 'preformatted-paragraph':
+          return <pre>{children}</pre>
       }
     }
   },
@@ -66,11 +81,15 @@ const HTML_RULES = [
 
         case 'mlink': {
           let name = obj.data.get('name') ? obj.data.get('name') : children
-          return <a className="mlink" href={'/biographies/' + name}>{children}</a>
+          let lastWord = name.split(' ').pop()
+          let formatted = purge_mlink(lastWord)
+          return <a className="mlink" href={'/Biographies/' + formatted}>{children}</a>
         }
         case 'wlink': {
           let name = obj.data.get('name') ? obj.data.get('name') : children
-          return <a className="wlink" href={'/biographies/' + name}>{children}</a>
+          let lastWord = name.split(' ').pop()
+          let formatted = purge_mlink(lastWord)
+          return <a className="wlink" href={'/Biographies/' + formatted}>{children}</a>
         }
         case 'gllink':
           let file = obj.data.get('file')
@@ -79,9 +98,6 @@ const HTML_RULES = [
           let name = obj.data.get('name')
           return <a className="aclink" href={'/academy/' + name}>{children}</a>
         }
-        case 'elink':
-          let num = obj.data.get('num')
-          return <a className="elink" href={'#ref' + num}>{children}</a>
 
         case 'color':
           const color = obj.data.get('color') ? obj.data.get('color') : 'black'
@@ -109,16 +125,25 @@ const HTML_RULES = [
 
         case 'reference':
           const rnum = obj.data.get('num')
-          return (<span>[<a href={'#ref' + rnum} className="reference">{rnum}</a>]</span>)
+          return (<span>[<a href={'#reference-' + rnum} className="reference">{rnum}</a>]</span>)
 
         case 'translation':
-          const tnum = obj.data.get('num')
-          return <a href={'/translation/' + tnum} className="translation">&#9417;</a>
+          const translationText = obj.data.get('num')
+          return (
+            <span>
+              <a data-type="translation" data-translation={translationText} className="translation nonoscript">&#9417;</a>
+              <noscript>({translationText})</noscript>
+            </span>
+          )
 
         case 'math':
           const mathraw = obj.data.get('math')
           const html = katex.renderToString(mathraw, {throwOnError: false})
           return <span className="math" dangerouslySetInnerHTML={{__html: html}}></span>
+
+        case 'anchor':
+          const anchor = obj.data.get('anchor')
+          return <a name={anchor}></a>
       }
     }
   }

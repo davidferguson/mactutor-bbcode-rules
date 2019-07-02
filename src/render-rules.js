@@ -40,6 +40,8 @@ const RENDER_BLOCK = (props, editor, next) => {
       return <p style={{textAlign: 'center'}}>{children}</p>
     case 'indent-paragraph':
       return <p style={{margin: '1em 0 1em 40px'}}>{children}</p>
+    case 'preformatted-paragraph':
+      return <pre>{children}</pre>
 
     default:
       return next()
@@ -74,7 +76,6 @@ const RENDER_MARK = (props, editor, next) => {
     case 'link':
     case 'mlink':
     case 'wlink':
-    case 'elink':
       return <span style={{color: '#0000ee', textDecoration: 'underline'}}>{children}</span>
     case 'gllink':
       return <span style={{color: 'green', textDecoration: 'underline'}}>{children}</span>
@@ -126,6 +127,10 @@ const RENDER_INLINE = (props, editor, next) => {
       const mathraw = node.data.get('math')
       const html = katex.renderToString(mathraw, {throwOnError: false})
       return <span className="math" dangerouslySetInnerHTML={{__html: html}}></span>
+
+    case 'anchor':
+      const anchor = node.data.get('anchor')
+      return <span className="anchor" contentEditable={false} onDrop={e => e.preventDefault()}>&#9398;</span>
 
     default:
       return next()

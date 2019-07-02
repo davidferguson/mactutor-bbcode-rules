@@ -14,6 +14,7 @@ const BBCODE_TAGS = [
   'quote',
   'center',
   'ind',
+  'pre',
 
   // marks
   'url',
@@ -27,7 +28,6 @@ const BBCODE_TAGS = [
   'w',
   'gl',
   'ac',
-  'e',
   'color',
   'big',
   'small',
@@ -37,7 +37,8 @@ const BBCODE_TAGS = [
   'img',
   'ref',
   't',
-  'math'
+  'math',
+  'anchor'
 ]
 
 const BBCODE_RULES = [
@@ -66,7 +67,7 @@ const BBCODE_RULES = [
           return `${openTag}${children}[/p]`
 
         case 'list':
-          return `[ol]${children}[/ol]`
+          return `[list]${children}[/list]`
         case 'list-item':
           return `[item]${children}[/item]`
 
@@ -77,6 +78,8 @@ const BBCODE_RULES = [
           return `[center]${children}[/center]`
         case 'indent-paragraph':
           return `[ind]${children}[/ind]`
+        case 'preformatted-paragraph':
+          return `[pre]${children}[/pre]`
       }
     },
     deserialize (node, next) {
@@ -101,7 +104,7 @@ const BBCODE_RULES = [
           const data = (keys.length === 1) ? {color: keys[0]} : {}
           return {object: 'block', type: 'paragraph', data: data, nodes: next(node.content)}
 
-        case 'ol':
+        case 'list':
           children = next(node.content).filter(child => child.type === 'list-item')
           return {object: 'block', type: 'list', data: {}, nodes:children }
         case 'item':
@@ -114,6 +117,8 @@ const BBCODE_RULES = [
           return {object: 'block', type: 'center-paragraph', data: {}, nodes: next(node.content)}
         case 'ind':
           return {object: 'block', type: 'indent-paragraph', data: {}, nodes: next(node.content)}
+        case 'pre':
+          return {object: 'block', type: 'preformatted-paragraph', data: {}, nodes: next(node.content)}
       }
     }
   },
@@ -160,11 +165,6 @@ const BBCODE_RULES = [
           const name = obj.data.get('name')
           const openTag = `[ac=${name}]`
           return `${openTag}${children}[/ac]`
-        }
-        case 'elink': {
-          const num = obj.data.get('num')
-          const openTag = `[e=${num}]`
-          return `${openTag}${children}[/e]`
         }
 
         case 'color':
@@ -222,11 +222,6 @@ const BBCODE_RULES = [
           const data = {name: keys[0]}
           return {object: 'mark', type: 'aclink', data: data, nodes: next(node.content)}
         }
-        case 'e': {
-          const keys = Object.keys(attrs)
-          const data = {num: keys[0]}
-          return {object: 'mark', type: 'elink', data: data, nodes: next(node.content)}
-        }
 
         case 'color': {
           const keys = Object.keys(attrs)
@@ -265,6 +260,10 @@ const BBCODE_RULES = [
         case 'math':
           const math = obj.data.get('math')
           return `[math]${math}[/math]`
+
+        case 'anchor':
+          const anchor = obj.data.get('anchor')
+          return `[anchor]${anchor}[/anchor]`
       }
     },
     deserialize (node, next) {
@@ -293,6 +292,12 @@ const BBCODE_RULES = [
           const textval = content.filter(node => node.object === 'text')
                                  .reduce((val, node) => val + node.text, '')
           return {object: 'inline', type: 'math', data: {math: textval}, nodes: content}
+        }
+        case 'anchor': {
+          const content = next(node.content)
+          const textval = content.filter(node => node.object === 'text')
+                                 .reduce((val, node) => val + node.text, '')
+          return {object: 'inline', type: 'anchor', data: {anchor: textval}, nodes: content}
         }
       }
     }
