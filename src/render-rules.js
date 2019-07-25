@@ -1,5 +1,6 @@
 import React from 'react'
 import katex from 'katex'
+import { Range } from 'slate'
 
 /**
  * Render a Slate block.
@@ -8,7 +9,7 @@ import katex from 'katex'
  * @return {Element}
  */
 const RENDER_BLOCK = (props, editor, next) => {
-  const { attributes, children, node } = props
+  const { children, node } = props
 
   switch (node.type) {
     case 'heading-one':
@@ -43,6 +44,9 @@ const RENDER_BLOCK = (props, editor, next) => {
     case 'preformatted-paragraph':
       return <pre>{children}</pre>
 
+    case 'inlineblock':
+      return <p>{children}</p>
+
     default:
       return next()
   }
@@ -56,7 +60,7 @@ const RENDER_BLOCK = (props, editor, next) => {
  * @return {Element}
  */
 const RENDER_MARK = (props, editor, next) => {
-  const { children, mark, attributes } = props
+  const { children, mark } = props
 
   switch (mark.type) {
     case 'bold':
@@ -69,9 +73,9 @@ const RENDER_MARK = (props, editor, next) => {
       return <span style={{textDecoration: 'overline'}}>{children}</span>
 
     case 'superscript':
-      return <span style={{verticalAlign: 'sub'}}>{children}</span>
-    case 'subscript':
       return <span style={{verticalAlign: 'super'}}>{children}</span>
+    case 'subscript':
+      return <span style={{verticalAlign: 'sub'}}>{children}</span>
 
     case 'link':
     case 'mlink':
@@ -99,6 +103,20 @@ const RENDER_MARK = (props, editor, next) => {
   }
 }
 
+function clickHandler (node, editor) {
+  let start = editor.value.selection.start
+  start = start.moveToStartOfNode(node)
+  let end = editor.value.selection.end
+  end = end.moveToEndOfNode(node)
+
+  const r = Range.fromJSON({
+    anchor: start,
+    focus: end
+  })
+
+  editor.select(r)
+}
+
 
 /**
  * Render a Slate inline.
@@ -109,28 +127,29 @@ const RENDER_MARK = (props, editor, next) => {
  * @return {Element}
  */
 const RENDER_INLINE = (props, editor, next) => {
-  const { attributes, node, isFocused } = props
+  const { node, isFocused } = props
+
   switch (node.type) {
     case 'image':
       const src = node.data.get('src')
-      return <img className="image" src={src} contentEditable={false} onDrop={e => e.preventDefault()} />
+      return <img onClick={() => {clickHandler(node, editor)}} alt="" className="image" src={src} contentEditable={false} onDrop={e => e.preventDefault()} style={{outline: isFocused ? '1px solid red' : 'none', cursor: 'pointer'}} />
 
     case 'reference':
       const rnum = node.data.get('num')
-      return <span className="reference" contentEditable={false} onDrop={e => e.preventDefault()}>[{rnum}]</span>
+      return <span onClick={() => {clickHandler(node, editor)}} className="reference" contentEditable={false} onDrop={e => e.preventDefault()} style={{outline: isFocused ? '1px solid red' : 'none', cursor: 'pointer'}}>[{rnum}]</span>
 
     case 'translation':
-      const tnum = node.data.get('num')
-      return <span className="translation" contentEditable={false} onDrop={e => e.preventDefault()}>&#9417;</span>
+      //const tnum = node.data.get('num')
+      return <span onClick={() => {clickHandler(node, editor)}} className="translation" contentEditable={false} onDrop={e => e.preventDefault()} style={{outline: isFocused ? '1px solid red' : 'none', cursor: 'pointer'}}>&#9417;</span>
 
     case 'math':
       const mathraw = node.data.get('math')
       const html = katex.renderToString(mathraw, {throwOnError: false})
-      return <span className="math" dangerouslySetInnerHTML={{__html: html}}></span>
+      return <span onClick={() => {clickHandler(node, editor)}} className="math" dangerouslySetInnerHTML={{__html: html}} style={{outline: isFocused ? '1px solid red' : 'none', cursor: 'pointer'}}></span>
 
     case 'anchor':
-      const anchor = node.data.get('anchor')
-      return <span className="anchor" contentEditable={false} onDrop={e => e.preventDefault()}>&#9398;</span>
+      //const anchor = node.data.get('anchor')
+      return <span onClick={() => {clickHandler(node, editor)}} className="anchor" contentEditable={false} onDrop={e => e.preventDefault()} style={{outline: isFocused ? '1px solid red' : 'none', cursor: 'pointer'}}>&#9398;</span>
 
     default:
       return next()

@@ -1,5 +1,3 @@
-import katex from 'katex'
-
 const BBCODE_TAGS = [
   // blocks
   'h1',
@@ -9,7 +7,7 @@ const BBCODE_TAGS = [
   'h5',
   'h6',
   'p',
-  'ol',
+  'list',
   'item',
   'quote',
   'center',
@@ -80,6 +78,9 @@ const BBCODE_RULES = [
           return `[ind]${children}[/ind]`
         case 'preformatted-paragraph':
           return `[pre]${children}[/pre]`
+
+        case 'inlineblock':
+          return children
       }
     },
     deserialize (node, next) {
@@ -247,7 +248,7 @@ const BBCODE_RULES = [
       switch (obj.type) {
         case 'image':
           const src = obj.data.get('src')
-          return `[img]${src}[/small]`
+          return `[img]${src}[/img]`
 
         case 'reference':
           const rnum = obj.data.get('num')
@@ -267,7 +268,7 @@ const BBCODE_RULES = [
       }
     },
     deserialize (node, next) {
-      const {tag, attrs} = node
+      const { tag } = node
       switch (tag) {
         case 'img': {
           const content = next(node.content)

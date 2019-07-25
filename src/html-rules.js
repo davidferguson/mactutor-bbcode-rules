@@ -52,6 +52,9 @@ const HTML_RULES = [
           return <p className="indent-paragraph">{children}</p>
         case 'preformatted-paragraph':
           return <pre>{children}</pre>
+
+        case 'inlineblock':
+          return children
       }
     }
   },
@@ -80,13 +83,29 @@ const HTML_RULES = [
           return <span className="superscript">{children}</span>
 
         case 'mlink': {
-          let name = obj.data.get('name') ? obj.data.get('name') : children
+          let name = obj.data.get('name')
+          if (!name && children) {
+            if (!Array.isArray(children)) {
+              console.error('mlink on non-array', children)
+              name = ''
+            } else {
+              name = children.filter(node => typeof node === 'string').pop()
+            }
+          }
           let lastWord = name.split(' ').pop()
           let formatted = purge_mlink(lastWord)
           return <a className="mlink" href={'/Biographies/' + formatted}>{children}</a>
         }
         case 'wlink': {
-          let name = obj.data.get('name') ? obj.data.get('name') : children
+          let name = obj.data.get('name')
+          if (!name && children) {
+            if (!Array.isArray(children)) {
+              console.error('mlink on non-array', children)
+              name = ''
+            } else {
+              name = children.filter(node => typeof node === 'string').pop()
+            }
+          }
           let lastWord = name.split(' ').pop()
           let formatted = purge_mlink(lastWord)
           return <a className="wlink" href={'/Biographies/' + formatted}>{children}</a>
@@ -121,7 +140,7 @@ const HTML_RULES = [
       switch (obj.type) {
         case 'image':
           const src = obj.data.get('src')
-          return <img className="image" src={src} />
+          return <img className="image" src={src} alt="" />
 
         case 'reference':
           const rnum = obj.data.get('num')
