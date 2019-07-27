@@ -103,20 +103,6 @@ const RENDER_MARK = (props, editor, next) => {
   }
 }
 
-function clickHandler (node, editor) {
-  let start = editor.value.selection.start
-  start = start.moveToStartOfNode(node)
-  let end = editor.value.selection.end
-  end = end.moveToEndOfNode(node)
-
-  const r = Range.fromJSON({
-    anchor: start,
-    focus: end
-  })
-
-  editor.select(r)
-}
-
 
 /**
  * Render a Slate inline.
@@ -132,24 +118,24 @@ const RENDER_INLINE = (props, editor, next) => {
   switch (node.type) {
     case 'image':
       const src = node.data.get('src')
-      return <img onClick={() => {clickHandler(node, editor)}} alt="" className="image" src={src} contentEditable={false} onDrop={e => e.preventDefault()} style={{outline: isFocused ? '1px solid red' : 'none', cursor: 'pointer'}} />
+      return <img onClick={() => {editor.props.onInlineClick ? editor.props.onInlineClick(node) : ''}} alt="" className="image" src={src} contentEditable={false} onDrop={e => e.preventDefault()} style={{outline: isFocused ? '1px solid red' : 'none', cursor: 'pointer'}} />
 
     case 'reference':
       const rnum = node.data.get('num')
-      return <span onClick={() => {clickHandler(node, editor)}} className="reference" contentEditable={false} onDrop={e => e.preventDefault()} style={{outline: isFocused ? '1px solid red' : 'none', cursor: 'pointer'}}>[{rnum}]</span>
+      return <span onClick={() => {editor.props.onInlineClick ? editor.props.onInlineClick(node) : ''}} className="reference" contentEditable={false} onDrop={e => e.preventDefault()} style={{outline: isFocused ? '1px solid red' : 'none', cursor: 'pointer'}}>[{rnum}]</span>
 
     case 'translation':
       //const tnum = node.data.get('num')
-      return <span onClick={() => {clickHandler(node, editor)}} className="translation" contentEditable={false} onDrop={e => e.preventDefault()} style={{outline: isFocused ? '1px solid red' : 'none', cursor: 'pointer'}}>&#9417;</span>
+      return <span onClick={() => {editor.props.onInlineClick ? editor.props.onInlineClick(node) : ''}} className="translation" contentEditable={false} onDrop={e => e.preventDefault()} style={{outline: isFocused ? '1px solid red' : 'none', cursor: 'pointer'}}>&#9417;</span>
 
     case 'math':
       const mathraw = node.data.get('math')
       const html = katex.renderToString(mathraw, {throwOnError: false})
-      return <span onClick={() => {clickHandler(node, editor)}} className="math" dangerouslySetInnerHTML={{__html: html}} style={{outline: isFocused ? '1px solid red' : 'none', cursor: 'pointer'}}></span>
+      return <span onClick={() => {editor.props.onInlineClick ? editor.props.onInlineClick(node) : ''}} className="math" dangerouslySetInnerHTML={{__html: html}} style={{outline: isFocused ? '1px solid red' : 'none', cursor: 'pointer'}}></span>
 
     case 'anchor':
       //const anchor = node.data.get('anchor')
-      return <span onClick={() => {clickHandler(node, editor)}} className="anchor" contentEditable={false} onDrop={e => e.preventDefault()} style={{outline: isFocused ? '1px solid red' : 'none', cursor: 'pointer'}}>&#9398;</span>
+      return <span onClick={() => {editor.props.onInlineClick ? editor.props.onInlineClick(node) : ''}} className="anchor" contentEditable={false} onDrop={e => e.preventDefault()} style={{outline: isFocused ? '1px solid red' : 'none', cursor: 'pointer'}}>&#9398;</span>
 
     default:
       return next()
